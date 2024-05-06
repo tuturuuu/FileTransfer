@@ -5,10 +5,7 @@
 
 package com.tuturuu.socket.Client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
@@ -45,12 +42,44 @@ public class ClientFTP {
 
             }while (true);
 
+            do {
                 System.out.println("PASSWORD: ");
                 echoes = scanner.nextLine();
                 out.println("PASSWORD " + echoes);
 
+                echoes = in.readLine();
+                if(echoes.equals("OK Login successful")){
+                    System.out.println(echoes);
+                    break;
+                } else if (echoes.equals("ERR Password incorrect")){
+                    System.out.println(echoes);
+                }
 
+            }while (true);
 
+            echoes = in.readLine();
+            System.out.println(echoes);
+            int fileSize = 0;
+            if(echoes.startsWith("File size: ")){
+                fileSize = Integer.parseInt(echoes.substring(11));
+            }
+
+            try (InputStream inputStream = socket.getInputStream();
+                 FileOutputStream imageOutputStream = new FileOutputStream("secret_image.png")) {
+
+                byte[] buffer = new byte[1024];
+                int bytesRead=0;
+
+                while (fileSize > 0) {
+
+                    bytesRead = inputStream.read(buffer);
+                    fileSize = fileSize - bytesRead;
+                    imageOutputStream.write(buffer, 0, bytesRead);
+
+                }
+                out.println("OK received");
+                System.out.println("Image received from server");
+            }
 
 
         } catch (IOException e) {
